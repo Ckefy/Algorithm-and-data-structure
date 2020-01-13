@@ -1,0 +1,181 @@
+﻿#include <iostream>
+#define ll long long
+
+using namespace std;
+
+ll inf = 10000000000;
+
+struct node {
+    node *l, *r, *parent;
+    ll key;
+    string color;
+    node(){}
+    node (ll key, string color) : l(nullptr), r(nullptr), key (key), color(color){};
+};
+
+node* root = nullptr;
+
+bool exists (ll x){
+    if (root == nullptr){
+        return false;
+    }
+    node* cur = root;
+    while (cur -> key != x){
+        if (x < cur -> key){
+            cur = cur -> l;
+        } else {
+            cur = cur -> r;
+        }
+        if (cur == nullptr){
+            return false;
+        }
+    }
+    return true;
+}
+
+void insert (ll x){
+    node* now = new node (x, "red");
+    if (root == nullptr){
+        root = now;
+        now -> parent = nullptr;
+    } else {
+        node* p = root;
+        node* q = nullptr;
+        while (p != nullptr){
+            q = p;
+             if (p -> key < now -> key)
+                p = p -> r;
+            else
+                p = p -> l;
+        }
+        now -> parent = q;
+        if (q -> key < now -> key)
+                q -> r = now;
+            else
+                q -> l = now;
+        insertionFixed(now);
+    }
+}
+
+void insertionFixed (node* now){
+    if (now -> parent == nullptr){
+        now -> color = "black";
+        return;
+    }
+    while (now -> parent -> color == "red"){
+        if (now -> parent == now -> parent -> parent -> l){
+            if (now -> parent -> parent -> r != nullptr){
+                if (now -> parent -> parent -> r -> color == "red"){
+                    now -> parent -> color = "black";
+                    now -> parent -> parent -> r -> color = "black";
+                    now -> parent -> parent -> color = "red";
+                    now = now -> parent -> parent;
+                }
+            } else {
+                node* nowParent = now -> parent;
+                node* nowGrand = now -> parent -> parent;
+                if (now == now -> parent -> r){
+                    now = now -> parent;
+                    leftRotate (now);
+                }
+                nowParent -> color = "black";
+                nowGrand -> color = "red";
+                rightRotate (nowGrand);
+            }
+        } else {
+            if (now -> parent -> parent -> l != nullptr){
+                if (now -> parent -> parent -> l -> color == "red"){
+                    now -> parent -> color = "black";
+                    now -> parent -> parent -> l -> color = "black";
+                    now -> parent -> parent -> color = "red";
+                    now = now -> parent -> parent;
+                }
+            } else {
+                node* nowParent = now -> parent;
+                node* nowGrand = now -> parent -> parent;
+                if (now == now -> parent -> l){
+                    now = now -> parent;
+                    rightRotate (now);
+                }
+                nowParent -> color = "black";
+                nowGrand -> color = "red";
+                leftRotate (nowGrand);
+            }
+        }
+        root -> color = "black";
+    }
+}
+
+ll prev (ll x){
+    node* cur = root;
+    ll ans = inf;
+    while (cur !=  nullptr){
+      if (cur -> key >= x)
+         cur = cur -> l;
+      else {
+         ans = cur -> key;
+         cur = cur -> r;
+      }
+    }
+    return ans;
+} //if returns inf then must type "none"
+
+ll next (ll x){
+    node* cur = root;
+    ll ans = inf;
+    while (cur !=  nullptr){
+      if (cur -> key > x) {
+         ans = cur -> key;
+         cur = cur -> l;
+      }
+      else
+         cur = cur -> r;
+    }
+    return ans;
+} //if returns inf then must type "none"
+
+ll mini (node* cur){
+    if (cur -> l == nullptr){
+        return cur -> key;
+    }
+    return mini (cur -> l);
+}
+
+
+
+int main()
+{
+    string s;
+    while (cin>>s){
+        ll x;
+        cin>>x;
+        if (s == "insert"){
+            if (!exists(x)){
+                insert (x);
+            }
+        } else if (s == "delete"){
+            if (exists(x)){
+                root = del (root, nullptr, x);
+            }
+        } else if (s == "exists"){
+            bool ans = exists(x);
+            if (ans){
+                cout<<"true"<<"\n";
+            } else
+                cout<<"false"<<"\n";
+        } else if (s == "prev"){
+            ll ans = prev(x);
+            if (ans == inf){
+                cout<<"none"<<"\n";
+            } else
+                cout<<ans<<"\n";
+        } else {
+            ll ans = next(x);
+            if (ans == inf){
+                cout<<"none"<<"\n";
+            } else
+                cout<<ans<<"\n";
+        }
+    }
+}
+close
